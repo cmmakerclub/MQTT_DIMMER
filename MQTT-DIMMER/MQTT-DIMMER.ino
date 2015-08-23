@@ -13,7 +13,7 @@ WiFiConnector *wifi;
 // MQTT_HOSTT
 #define MQTT_HOST        "192.168.15.148"
 #define MQTT_PORT        1883
-#define PUBLISH_EVERY    15 *1000 // every 15 seconds
+#define PUBLISH_EVERY    20 *1000 // every 15 seconds
 
 #define DEVICE_NAME "MQTT-DIMMER"
 #define AUTHOR      "Compiler Exe"
@@ -31,6 +31,8 @@ byte state = 0;
 byte tarBrightness = 255;
 byte curBrightness = 0;
 byte zcState = 0; // 0 = ready; 1 = processing; 2 = double trigger fix
+
+unsigned long _last_message = millis();
 
 
 #include "init_wifi.h"
@@ -63,23 +65,37 @@ void setup()
   init_mqtt();
 }
 
+// long counter = 0;
+long prev = millis();
+int direction = 1;
+int target = 0;
 void loop()
 {
-  mqtt->loop(wifi);
-}
+    if (target >= 98) {
+      direction = -1;
+    }
+    else if (target <= 2) {
+      direction = 1;
+    }  
+  if (millis() - prev > 30) {
 
+    target += direction;
+    tarBrightness = target;
+    prev =  millis();
+    Serial.println(target);
+  }
+}
 
 void zcDetect()
 {
-  if (tarBrightness < 128 && tarBrightness > 1) {
-    int x = map(tarBrightness, 100, 0, 1, 128);
+  int target = tarBrightness;
+  if (target < 128 && target > 1) {
+    // counter++;
+    int x = map(target, 100, 0, 1, 128);
     int dimtime = (75 * x);  // For 60Hz =>65
-    Serial.println(x);
     delayMicroseconds(dimtime);    // Wait till firing the TRIAC
     digitalWrite(outPin, HIGH);   // Fire the TRIAC
     delayMicroseconds(5);         // triac On propogation delay (for 60Hz use 8.33)
     digitalWrite(outPin, LOW);
   }
-   
 }
-

@@ -2,8 +2,8 @@
 void init_wifi()
 {
   // use flash memory ssid & smartconfig
-  wifi = new WiFiConnector();
-  // wifi = new WiFiConnector("SSID", "PASSWORD");
+  // wifi = new WiFiConnector();
+  wifi = new WiFiConnector("NAT.11", "guestnetwork");
 
 
   wifi->on_connecting([&](const void* message)
@@ -28,7 +28,9 @@ void init_wifi()
 
   wifi->on_disconnected([&](const void* message)
   {
+    detachInterrupt(zcPin);
     Serial.println("WIFI DISCONECTED.");
+    // detachInterrupt()
     // Serial.println ((char*)message);
   });
 
