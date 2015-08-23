@@ -17,13 +17,13 @@ void init_wifi()
 
   wifi->on_connected([&](const void* message)
   {
+
     Serial.println("WIFI CONECTED: ");
     // Print the IP address
     Serial.println(WiFi.localIP());
     // Serial.println ((char*)message);
       delay(200);
      //attachInterrupt(switchPin, switchDetect, CHANGE);
-     attachInterrupt(zcPin, zcDetect, RISING);
   });
 
   wifi->on_disconnected([&](const void* message)

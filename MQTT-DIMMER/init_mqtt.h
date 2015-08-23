@@ -14,13 +14,15 @@ void init_mqtt()
     Serial.print("__PUBLICATION TOPIC -> ");
     Serial.println(config->topicPub);
     Serial.print("__SUBSCRIPTION TOPIC -> ");
-    Serial.println(config->topicSub);    
+    Serial.println(config->topicSub);  
   });
 
   mqtt->prepare_data(on_prepare_data, PUBLISH_EVERY);
 
 
-  mqtt->prepare_subscribe([&](MQTT::Subscribe * sub) -> void { });
+  mqtt->prepare_subscribe([&](MQTT::Subscribe * sub) -> void {
+     attachInterrupt(zcPin, zcDetect, RISING);
+   });
 
 
   mqtt->after_prepare_data([&](JsonObject * root) -> void {
