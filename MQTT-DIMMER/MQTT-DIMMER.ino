@@ -50,14 +50,15 @@ unsigned long _last_message = millis();
 #include "init_mqtt.h"
 
 void timer2() {
-    digitalWrite(outPin, LOW);
 }
 
 void timer() {
   digitalWrite(outPin, HIGH); // Fire the TRIAC
   timer1_detachInterrupt();
   timer1_isr_init();
-  timer1_attachInterrupt(timer2);
+  timer1_attachInterrupt([&]() -> void {
+    digitalWrite(outPin, LOW);
+  });
   timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
   timer1_write(5*10); // 5 ticks/us 
 }
@@ -126,23 +127,7 @@ int last_dim = 0;;
 unsigned long _micro = micros();
 void zcDetect()
 {
-jj  static int count = 0;;
   int target = tarBrightness;
-  if (millis() - _prev >= 5000) {
-    en = true;
-    Serial.print("COUNT: ");
-    Serial.print(count);
-    count =0;
-    Serial.print("X: ");
-    Serial.print(x);
-    Serial.print("T: ");    
-    Serial.println(dimtime);
-    _prev = millis();
-  }
-  else {
-    en = false;
-  }
-  count++;
 
   x = map(target, 100, 0, 1, 128);
   dimtime = (78 * x);  // For 60Hz =>65
@@ -151,7 +136,7 @@ jj  static int count = 0;;
     timer1_isr_init();
     timer1_attachInterrupt(timer);
     timer1_enable(TIM_DIV16, TIM_EDGE, TIM_SINGLE);
-    timer1_write( (5* dimtime)); // 5 ticks/us 
+    timer1_write((5* dimtime) - (10*5)); // 5 ticks/us 
 
 
 }
